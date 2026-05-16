@@ -1,7 +1,7 @@
-from app.schemas.polling_station import PollingStationCreate, PollingStationOut
-from app.schemas.user import UserCreate, UserOut
-from app.schemas.ballot import BallotCreate, BallotOut
-from app.schemas.tally_sheet import TallySheetCreate, TallySheetOut
-from app.schemas.event import EventCreate, EventOut
-from app.schemas.inconsistency import InconsistencyCreate, InconsistencyOut
-from app.schemas.result import ResultCreate, ResultOut
+from app.schemas.casilla import CasillaCreate, CasillaOut
+from app.schemas.usuario import UsuarioCreate, UsuarioOut
+from app.schemas.boleta import BoletaCreate, BoletaOut
+from app.schemas.acta import ActaCreate, ActaOut
+from app.schemas.evento import EventoCreate, EventoOut
+from app.schemas.inconsistencia import InconsistenciaCreate, InconsistenciaOut
+from app.schemas.resultado import ResultadoCreate, ResultadoOut

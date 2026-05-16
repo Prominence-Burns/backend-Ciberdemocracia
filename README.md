@@ -1,19 +1,21 @@
-# Ciberdemocracia backend 🗳️
+# Ciberdemocracia — Backend API
 
-Sistema de auditoría electoral con inteligencia artificial para la clasificación, validación y trazabilidad de boletas y actas del PREP.
+> Sistema de auditoría electoral con Inteligencia Artificial para el escrutinio y cómputo de casillas electorales del estado de Chihuahua.
+
+Desarrollado en el marco del **Hackathon Ciberdemocracia**, organizado por el **Instituto Estatal Electoral de Chihuahua (IEE Chihuahua)** y el **Tecnológico de Monterrey**.
 
 ---
 
 ## Descripción
 
-CIberdemocracia es una API REST construida con FastAPI y SQLite que permite:
+Backend REST API que recibe, procesa y almacena los datos generados por el sistema de visión artificial de casillas electorales. Implementa el esquema AECC (`urn:ine:aecc:casilla:v1`) para el Acta de Escrutinio y Cómputo de Casilla, incluyendo:
 
-- Registrar casillas electorales con metadatos oficiales INE
-- Procesar boletas escaneadas con clasificación por IA y validación humana
-- Gestionar actas PREP con extracción automática de texto
-- Detectar y registrar inconsistencias en el proceso electoral
-- Mantener una bitácora inmutable de eventos del sistema
-- Consultar resultados agregados por casilla y partido
+- Registro de casillas electorales
+- Procesamiento de boletas con clasificación por IA
+- Registro de actas PREP con criterios de consistencia
+- Trazabilidad de eventos y auditoría
+- Detección y resolución de inconsistencias
+- Resultados agregados por partido o coalición
 
 ---
 
@@ -36,188 +38,196 @@ CIberdemocracia es una API REST construida con FastAPI y SQLite que permite:
 ```
 CIberdemocracia/
 ├── app/
-│   ├── __init__.py
 │   ├── main.py               ← punto de entrada
-│   ├── database.py           ← conexión a SQLite
-│   ├── models/               ← tablas de la base de datos
-│   │   ├── user.py
-│   │   ├── polling_station.py
-│   │   ├── ballot.py
-│   │   ├── tally_sheet.py
-│   │   ├── event.py
-│   │   ├── inconsistency.py
-│   │   └── result.py
+│   ├── database.py           ← conexión SQLite
+│   ├── models/               ← tablas de la BD
+│   │   ├── casilla.py
+│   │   ├── usuario.py
+│   │   ├── boleta.py
+│   │   ├── acta.py
+│   │   ├── evento.py
+│   │   ├── inconsistencia.py
+│   │   └── resultado.py
 │   ├── schemas/              ← validación Pydantic
-│   │   ├── user.py
-│   │   ├── polling_station.py
-│   │   ├── ballot.py
-│   │   ├── tally_sheet.py
-│   │   ├── event.py
-│   │   ├── inconsistency.py
-│   │   └── result.py
-│   └── routers/              ← endpoints CRUD
-│       ├── users.py
-│       ├── polling_stations.py
-│       ├── ballots.py
-│       ├── tally_sheets.py
-│       ├── events.py
-│       ├── inconsistencies.py
-│       └── results.py
+│   │   ├── casilla.py
+│   │   ├── usuario.py
+│   │   ├── boleta.py
+│   │   ├── acta.py
+│   │   ├── evento.py
+│   │   ├── inconsistencia.py
+│   │   └── resultado.py
+│   └── routers/              ← endpoints REST
+│       ├── casillas.py
+│       ├── usuarios.py
+│       ├── boletas.py
+│       ├── actas.py
+│       ├── eventos.py
+│       ├── inconsistencias.py
+│       └── resultados.py
 ├── alembic/                  ← migraciones
-├── alembic.ini
 ├── requirements.txt
 └── .env
 ```
 
 ---
 
+## Tablas de la base de datos
+
+| Tabla | Descripción |
+|---|---|
+| `casillas` | Metadatos de cada casilla electoral |
+| `usuarios` | Funcionarios, auditores y administradores |
+| `boletas` | Boletas procesadas por el sistema de visión |
+| `actas` | Actas AECC con bloques de control y consistencia |
+| `eventos` | Registro de auditoría de todas las acciones |
+| `inconsistencias` | Alertas y resoluciones de inconsistencias |
+| `resultados` | Votos por partido o coalición por casilla |
+
+---
+
+## Mapeo JSON AECC → Base de datos
+
+El sistema recibe JSONs conformes al schema `urn:ine:aecc:casilla:v1`. El mapeo entre claves del JSON y columnas de la BD es el siguiente:
+
+### `metadatos` → tabla `casillas`
+
+| JSON | Columna BD |
+|---|---|
+| `casilla_id` | `casilla_id` |
+| `entidad_federativa` | `entidad_federativa` |
+| `municipio_o_delegacion` | `municipio_o_delegacion` |
+| `distrito` | `distrito` |
+| `seccion` | `seccion` |
+| `tipo_casilla` | `tipo_casilla` |
+| `tipo_eleccion` | `tipo_eleccion` |
+| `proceso_electoral` | `proceso_electoral` |
+
+### `bloque_1` → tabla `actas`
+
+| JSON | Columna BD |
+|---|---|
+| `boletas_recibidas` | `boletas_recibidas` |
+| `BS` | `boletas_sobrantes` |
+| `PV` | `personas_votaron` |
+| `RPPV` | `rep_partido_fuera_lista` |
+| `SV` | `boletas_en_urna` |
+| `BSU` | `boletas_contadas` |
+
+### `bloque_2` → tabla `actas` + tabla `resultados`
+
+| JSON | Columna BD | Tabla |
+|---|---|---|
+| `CNR` | `candidatos_no_registrados` | `actas` |
+| `VN` | `votos_nulos` | `actas` |
+| `RV` | `total_votos` | `actas` |
+| `resultados[].partido_o_coalicion` | `partido_o_coalicion` | `resultados` |
+| `resultados[].id` | `partido_id` | `resultados` |
+| `resultados[].votos` | `votos` | `resultados` |
+| `resultados[].es_coalicion` | `es_coalicion` | `resultados` |
+| `resultados[].partidos_coalicion` | `partidos_coalicion` | `resultados` |
+
+### `consistencia` → tabla `actas`
+
+| JSON | Columna BD |
+|---|---|
+| `criterio_1_pv_rppv_sv` | `criterio_1` |
+| `criterio_2_sv_bsu` | `criterio_2` |
+| `criterio_3_bsu_rv` | `criterio_3` |
+| `criterio_4_sum_vi_rv` | `criterio_4` |
+| `acta_consistente` | `acta_consistente` |
+| `tipo_error` | `tipo_error` |
+
+### `incidentes` → tabla `actas`
+
+| JSON | Columna BD |
+|---|---|
+| `se_presentaron` | `incidentes_presentes` |
+| `descripcion` | `descripcion_incidentes` |
+| `hojas_de_incidentes` | `hojas_incidentes` |
+
+### Raíz del JSON → tabla `actas`
+
+| JSON | Columna BD |
+|---|---|
+| `boletas_procesadas` | `boletas_procesadas` |
+| `boletas_revision_humana` | `boletas_revision_humana` |
+| `hash_boletas` | `hash_boletas` |
+
+---
+
 ## Instalación
 
-### 1. Clonar el repositorio
-
 ```bash
+# 1. Clonar el repositorio
 git clone https://github.com/Prominence-Burns/backend-Ciberdemocracia.git
 cd backend-Ciberdemocracia
-```
 
-### 2. Crear y activar entorno virtual
-
-```bash
+# 2. Crear entorno virtual
 conda create -n ciberdemocracia python=3.11
 conda activate ciberdemocracia
-```
 
-### 3. Instalar dependencias
-
-```bash
+# 3. Instalar dependencias
 pip install -r requirements.txt
-```
 
-### 4. Configurar variables de entorno
+# 4. Configurar variables de entorno
+# Crear archivo .env con el siguiente contenido:
+# DATABASE_URL=sqlite:///./electoral.db
 
-Crea un archivo `.env` en la raíz del proyecto:
-
-```
-DATABASE_URL=sqlite:///./electoral.db
-```
-
-### 5. Crear la base de datos
-
-```bash
+# 5. Crear base de datos
 alembic upgrade head
-```
 
-### 6. Levantar el servidor
-
-```bash
+# 6. Levantar servidor
 uvicorn app.main:app --reload
 ```
 
 ---
 
-## Uso
+## Documentación de la API
 
-Una vez levantado el servidor, accede a la documentación interactiva:
+Una vez levantado el servidor, accede a:
 
-| URL | Descripción |
-|---|---|
-| `http://127.0.0.1:8000/docs` | Swagger UI — prueba los endpoints |
-| `http://127.0.0.1:8000/redoc` | ReDoc — documentación alternativa |
-| `http://127.0.0.1:8000/` | Health check |
+- **Swagger UI:** `http://127.0.0.1:8000/docs`
+- **ReDoc:** `http://127.0.0.1:8000/redoc`
 
----
+### Endpoints disponibles
 
-## Endpoints principales
-
-### Casillas (`/polling-stations`)
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/polling-stations/` | Listar todas las casillas |
-| POST | `/polling-stations/` | Registrar casilla |
-| GET | `/polling-stations/{id}` | Consultar casilla |
-| DELETE | `/polling-stations/{id}` | Eliminar casilla |
-
-### Boletas (`/ballots`)
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | `/ballots/` | Listar boletas |
-| POST | `/ballots/` | Registrar boleta escaneada |
-| GET | `/ballots/{id}` | Consultar boleta |
-| DELETE | `/ballots/{id}` | Eliminar boleta |
-
-### Eventos (`/events`)
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | `/events/` | Listar eventos del sistema |
-| POST | `/events/` | Registrar evento |
-| GET | `/events/{id}` | Consultar evento |
-
-### Otros endpoints
-- `/users/` — Gestión de usuarios y roles
-- `/tally-sheets/` — Actas PREP
-- `/inconsistencies/` — Inconsistencias detectadas
-- `/results/` — Resultados por casilla y partido
-
----
-
-## Modelo de datos
-
-### Entidades principales
-
-```
-polling_stations    ← casillas electorales
-    └── users       ← funcionarios asignados
-    └── ballots     ← boletas procesadas
-    └── tally_sheets← actas PREP
-    └── results     ← resultados agregados
-
-ballots
-    └── inconsistencies ← anomalías detectadas
-
-events              ← bitácora del sistema (trazabilidad)
-```
-
-### Tipos de eventos registrados
-
-| Evento | Descripción |
-|---|---|
-| `ballot_scanned` | Boleta escaneada |
-| `vote_detected` | Voto clasificado por IA |
-| `inconsistency_detected` | Anomalía encontrada |
-| `manual_override` | Corrección humana |
-| `results_submitted` | Resultados enviados |
-| `dashboard_updated` | Dashboard actualizado |
-
----
-
-## Integración con sistema de visión
-
-La API acepta el esquema oficial INE (`urn:ine:aecc:casilla:v1`) con los siguientes bloques:
-
-- `metadatos` → `polling_stations`
-- `bloque_1` → `tally_sheets` (conteos de boletas)
-- `bloque_2.resultados` → `results` (votos por partido/coalición)
-- `consistencia` → `inconsistencies`
-- `hash_boletas` → `events.hash`
-
----
-
-## Contribución
-
-1. Haz fork del repositorio
-2. Crea una rama para tu feature: `git checkout -b feature/nueva-funcionalidad`
-3. Haz commit de tus cambios: `git commit -m "Add: nueva funcionalidad"`
-4. Sube la rama: `git push origin feature/nueva-funcionalidad`
-5. Abre un Pull Request
+| POST | `/casillas/` | Registrar casilla |
+| GET | `/casillas/` | Listar casillas |
+| GET | `/casillas/{id}` | Obtener casilla |
+| POST | `/actas/` | Registrar acta AECC |
+| GET | `/actas/` | Listar actas |
+| POST | `/boletas/` | Registrar boleta |
+| GET | `/boletas/` | Listar boletas |
+| POST | `/resultados/` | Registrar resultado |
+| GET | `/resultados/` | Listar resultados |
+| POST | `/eventos/` | Registrar evento |
+| GET | `/eventos/` | Listar eventos |
+| POST | `/inconsistencias/` | Registrar inconsistencia |
+| GET | `/inconsistencias/` | Listar inconsistencias |
+| POST | `/usuarios/` | Registrar usuario |
+| GET | `/usuarios/` | Listar usuarios |
 
 ---
 
 ## Licencia
 
-Este proyecto es parte de una iniciativa académica de la Universidad Autónoma de Ciudad Juárez (UACJ).
+Este proyecto fue desarrollado con fines académicos y de innovación cívica en el marco del **Hackathon CIberdemocracia 2024**, organizado por:
+
+- **Instituto Estatal Electoral de Chihuahua (IEE Chihuahua)**
+- **Tecnológico de Monterrey**
+
+El uso del código fuente está permitido exclusivamente para fines educativos, de investigación y de mejora de los procesos electorales del estado de Chihuahua. Queda prohibida su reproducción o uso comercial sin autorización expresa de los organizadores del hackathon y del equipo desarrollador.
+
+© 2024 IEE Chihuahua — Hackathon CIberdemocracia. Todos los derechos reservados.
 
 ---
 
-## Contacto
+## Equipo
 
-Proyecto desarrollado en la UACJ — Ciudad Juárez, Chihuahua, México.
+| GitHub | Perfil |
+|---|---|
+| [@DeysChain](https://github.com/DeysChain) | Desarrollador |
+| [@YopiYuli](https://github.com/YopiYuli) | Desarrollador |
+| [@jedesvaz](https://github.com/jedesvaz) | Desarrollador |
