@@ -1,8 +1,8 @@
-"""rediseno tablas espanol
+"""columnas empatan JSON AECC
 
-Revision ID: fb9fc678f91a
+Revision ID: 59289c51ff42
 Revises: 
-Create Date: 2026-05-15 19:19:23.044133
+Create Date: 2026-05-15 19:42:50.127347
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'fb9fc678f91a'
+revision: str = '59289c51ff42'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,25 +40,25 @@ def upgrade() -> None:
     sa.Column('casilla_id', sa.String(), nullable=False),
     sa.Column('image_url', sa.String(), nullable=True),
     sa.Column('boletas_recibidas', sa.Integer(), nullable=True),
-    sa.Column('boletas_sobrantes', sa.Integer(), nullable=True),
-    sa.Column('personas_votaron', sa.Integer(), nullable=True),
-    sa.Column('rep_partido_fuera_lista', sa.Integer(), nullable=True),
-    sa.Column('boletas_en_urna', sa.Integer(), nullable=True),
-    sa.Column('boletas_contadas', sa.Integer(), nullable=True),
-    sa.Column('candidatos_no_registrados', sa.Integer(), nullable=True),
-    sa.Column('votos_nulos', sa.Integer(), nullable=True),
-    sa.Column('total_votos', sa.Integer(), nullable=True),
-    sa.Column('boletas_procesadas', sa.Integer(), nullable=True),
-    sa.Column('boletas_revision_humana', sa.Integer(), nullable=True),
-    sa.Column('criterio_1', sa.Boolean(), nullable=True),
-    sa.Column('criterio_2', sa.Boolean(), nullable=True),
-    sa.Column('criterio_3', sa.Boolean(), nullable=True),
-    sa.Column('criterio_4', sa.Boolean(), nullable=True),
+    sa.Column('BS', sa.Integer(), nullable=True),
+    sa.Column('PV', sa.Integer(), nullable=True),
+    sa.Column('RPPV', sa.Integer(), nullable=True),
+    sa.Column('SV', sa.Integer(), nullable=True),
+    sa.Column('BSU', sa.Integer(), nullable=True),
+    sa.Column('CNR', sa.Integer(), nullable=True),
+    sa.Column('VN', sa.Integer(), nullable=True),
+    sa.Column('RV', sa.Integer(), nullable=True),
+    sa.Column('criterio_1_pv_rppv_sv', sa.Boolean(), nullable=True),
+    sa.Column('criterio_2_sv_bsu', sa.Boolean(), nullable=True),
+    sa.Column('criterio_3_bsu_rv', sa.Boolean(), nullable=True),
+    sa.Column('criterio_4_sum_vi_rv', sa.Boolean(), nullable=True),
     sa.Column('acta_consistente', sa.Boolean(), nullable=True),
     sa.Column('tipo_error', sa.String(), nullable=True),
-    sa.Column('incidentes_presentes', sa.Boolean(), nullable=True),
-    sa.Column('descripcion_incidentes', sa.String(), nullable=True),
-    sa.Column('hojas_incidentes', sa.Integer(), nullable=True),
+    sa.Column('se_presentaron', sa.Boolean(), nullable=True),
+    sa.Column('descripcion', sa.String(), nullable=True),
+    sa.Column('hojas_de_incidentes', sa.Integer(), nullable=True),
+    sa.Column('boletas_procesadas', sa.Integer(), nullable=True),
+    sa.Column('boletas_revision_humana', sa.Integer(), nullable=True),
     sa.Column('hash_boletas', sa.String(), nullable=True),
     sa.Column('validation_status', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),

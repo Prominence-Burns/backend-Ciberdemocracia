@@ -1,30 +1,40 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
 class ActaCreate(BaseModel):
     casilla_id: str
     image_url: Optional[str] = None
+
+    # bloque_1
     boletas_recibidas: Optional[int] = None
-    boletas_sobrantes: Optional[int] = None
-    personas_votaron: Optional[int] = None
-    rep_partido_fuera_lista: Optional[int] = None
-    boletas_en_urna: Optional[int] = None
-    boletas_contadas: Optional[int] = None
-    candidatos_no_registrados: Optional[int] = None
-    votos_nulos: Optional[int] = None
-    total_votos: Optional[int] = None
-    boletas_procesadas: Optional[int] = None
-    boletas_revision_humana: Optional[int] = None
-    criterio_1: Optional[bool] = None
-    criterio_2: Optional[bool] = None
-    criterio_3: Optional[bool] = None
-    criterio_4: Optional[bool] = None
+    BS: Optional[int] = None
+    PV: Optional[int] = None
+    RPPV: Optional[int] = None
+    SV: Optional[int] = None
+    BSU: Optional[int] = None
+
+    # bloque_2
+    CNR: Optional[int] = None
+    VN: Optional[int] = None
+    RV: Optional[int] = None
+
+    # consistencia
+    criterio_1_pv_rppv_sv: Optional[bool] = None
+    criterio_2_sv_bsu: Optional[bool] = None
+    criterio_3_bsu_rv: Optional[bool] = None
+    criterio_4_sum_vi_rv: Optional[bool] = None
     acta_consistente: Optional[bool] = None
     tipo_error: Optional[str] = None
-    incidentes_presentes: bool = False
-    descripcion_incidentes: Optional[str] = None
-    hojas_incidentes: int = 0
+
+    # incidentes
+    se_presentaron: bool = False
+    descripcion: Optional[str] = None
+    hojas_de_incidentes: int = 0
+
+    # raíz
+    boletas_procesadas: Optional[int] = None
+    boletas_revision_humana: Optional[int] = None
     hash_boletas: Optional[str] = None
     validation_status: Optional[str] = None
 

@@ -10,35 +10,35 @@ class Acta(Base):
     casilla_id = Column(String, ForeignKey("casillas.id"), nullable=False)
     image_url = Column(String, nullable=True)
 
-    # Bloque 1 — Control de boletas
-    boletas_recibidas = Column(Integer, nullable=True)   # BR: 95
-    boletas_sobrantes = Column(Integer, nullable=True)   # BS: 50
-    personas_votaron = Column(Integer, nullable=True)    # PV: 45
-    rep_partido_fuera_lista = Column(Integer, nullable=True)  # RPPV: 0
-    boletas_en_urna = Column(Integer, nullable=True)     # SV = PV + RPPV
-    boletas_contadas = Column(Integer, nullable=True)    # BSU: 45
+    # bloque_1
+    boletas_recibidas = Column(Integer, nullable=True)
+    BS = Column(Integer, nullable=True)
+    PV = Column(Integer, nullable=True)
+    RPPV = Column(Integer, nullable=True)
+    SV = Column(Integer, nullable=True)
+    BSU = Column(Integer, nullable=True)
 
-    # Bloque 2 — Totales
-    candidatos_no_registrados = Column(Integer, nullable=True)  # CNR: 0
-    votos_nulos = Column(Integer, nullable=True)         # VN: 0
-    total_votos = Column(Integer, nullable=True)         # RV: 45
-    boletas_procesadas = Column(Integer, nullable=True)
-    boletas_revision_humana = Column(Integer, nullable=True)
+    # bloque_2
+    CNR = Column(Integer, nullable=True)
+    VN = Column(Integer, nullable=True)
+    RV = Column(Integer, nullable=True)
 
-    # Consistencia
-    criterio_1 = Column(Boolean, nullable=True)          # PV + RPPV = SV
-    criterio_2 = Column(Boolean, nullable=True)          # SV = BSU
-    criterio_3 = Column(Boolean, nullable=True)          # BSU = RV
-    criterio_4 = Column(Boolean, nullable=True)          # Σvotos = RV
+    # consistencia
+    criterio_1_pv_rppv_sv = Column(Boolean, nullable=True)
+    criterio_2_sv_bsu = Column(Boolean, nullable=True)
+    criterio_3_bsu_rv = Column(Boolean, nullable=True)
+    criterio_4_sum_vi_rv = Column(Boolean, nullable=True)
     acta_consistente = Column(Boolean, nullable=True)
     tipo_error = Column(String, nullable=True)
 
-    # Incidentes
-    incidentes_presentes = Column(Boolean, default=False)
-    descripcion_incidentes = Column(String, nullable=True)
-    hojas_incidentes = Column(Integer, default=0)
+    # incidentes
+    se_presentaron = Column(Boolean, default=False)
+    descripcion = Column(String, nullable=True)
+    hojas_de_incidentes = Column(Integer, default=0)
 
-    # Integridad
+    # raíz del JSON
+    boletas_procesadas = Column(Integer, nullable=True)
+    boletas_revision_humana = Column(Integer, nullable=True)
     hash_boletas = Column(String, nullable=True)
 
     validation_status = Column(String, nullable=True)
