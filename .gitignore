@@ -1,0 +1,16 @@
+# Entorno virtual
+ciberdemocracia/
+__pycache__/
+*.pyc
+
+# Base de datos
+electoral.db
+
+# Variables de entorno
+.env
+
+# Alembic
+alembic/versions/*.pyc
+
+# VS Code
+.vscode/
