@@ -6,7 +6,10 @@ from app.routers import (
     actas,
     eventos,
     inconsistencias,
-    resultados
+    resultados,
+    vision,
+    aecc,
+    auth                              
 )
 
 app = FastAPI(
@@ -22,6 +25,9 @@ app.include_router(actas.router)
 app.include_router(eventos.router)
 app.include_router(inconsistencias.router)
 app.include_router(resultados.router)
+app.include_router(vision.router)
+app.include_router(aecc.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def root():

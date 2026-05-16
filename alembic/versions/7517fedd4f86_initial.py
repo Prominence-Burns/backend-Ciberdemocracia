@@ -1,8 +1,8 @@
-"""columnas empatan JSON AECC
+"""initial
 
-Revision ID: 59289c51ff42
+Revision ID: 7517fedd4f86
 Revises: 
-Create Date: 2026-05-15 19:42:50.127347
+Create Date: 2026-05-16 00:38:35.910119
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '59289c51ff42'
+revision: str = '7517fedd4f86'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -79,12 +79,15 @@ def upgrade() -> None:
     )
     op.create_table('usuarios',
     sa.Column('id', sa.String(), nullable=False),
-    sa.Column('nombre', sa.String(), nullable=False),
+    sa.Column('nombre', sa.String(), nullable=True),
     sa.Column('rol', sa.String(), nullable=False),
     sa.Column('casilla_id', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('password_hash', sa.String(), nullable=True),
+    sa.Column('clave_de_elector', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['casilla_id'], ['casillas.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('clave_de_elector')
     )
     op.create_table('eventos',
     sa.Column('id', sa.String(), nullable=False),
